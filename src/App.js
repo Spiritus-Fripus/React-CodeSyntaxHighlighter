@@ -1,22 +1,20 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import logo from "./logo.svg";
+import Clock from "./Components/Clock/Clock";
+import CodeHighlighter from "./Components/CodeHighlighter/CodeHighlighter";
+import "bootstrap/dist/css/bootstrap.min.css";
+
+function Logo(props) {
+  return <img src={props.url} className="App-logo" alt="Logo" />;
+}
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <Logo url={logo} />
+        <Clock />
+        <CodeHighlighter />
       </header>
     </div>
   );
