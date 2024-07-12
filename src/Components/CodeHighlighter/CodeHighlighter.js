@@ -1,12 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import FormCodeHighlighter from "./FormCodeHighlighter";
-import Page from "../Items/Page";
-import CopyToClipboard from "../Items/CopyToClipboard";
-import ExportAsFile from "../Items/ExportAsFile";
-import ExportAsImage from "../Items/ExportAsImage";
-import DeleteItem from "../Items/DeleteItem";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus as vscDarkPlusTheme } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import FormCodeHighlighter from "../FormCodeHighlighter/FormCodeHighlighter";
+import ItemList from "../Items/CardItems/ItemList";
+import Pagination from "../Items/PageItems/Pagination";
+import { ref, push, onValue, remove } from "firebase/database";
+import { database } from "../../firebase";
 
 function CodeHighlighter() {
   const [tab, setTab] = useState([]);
@@ -20,10 +17,19 @@ function CodeHighlighter() {
   const itemsPerPage = 5;
 
   useEffect(() => {
-    const storedTab = JSON.parse(localStorage.getItem("tab"));
-    if (storedTab) {
-      setTab(storedTab);
-    }
+    const itemsRef = ref(database, "items");
+    onValue(itemsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const itemsList = Object.entries(data).map(([key, value]) => ({
+          id: key,
+          ...value,
+        }));
+        setTab(itemsList);
+      } else {
+        setTab([]);
+      }
+    });
     setSearchTerm("");
     setFilterLanguage("");
     setCurrentPage(0);
@@ -49,23 +55,36 @@ function CodeHighlighter() {
   const currentItems = filteredItems.slice(offset, offset + itemsPerPage);
 
   const saveNewItem = () => {
-    const newTab = [...tab, { title: title, code: code, language: language }];
-    setTab(newTab);
-    localStorage.setItem("tab", JSON.stringify(newTab));
-    setTitle("");
-    setCode("");
-    setLanguage("");
+    const newItem = { title, code, language };
+
+    const itemsRef = ref(database, "items");
+    push(itemsRef, newItem)
+      .then(() => {
+        console.log("Item saved successfully");
+
+        // Réinitialiser les champs après envoi
+        setTitle("");
+        setCode("");
+        setLanguage("");
+      })
+      .catch((error) => {
+        console.error("Error saving item:", error);
+      });
   };
 
   const handlePageChange = (selectedPage) => {
     setCurrentPage(selectedPage);
   };
 
-  const handleDeleteItem = (index) => {
-    const newTab = [...tab];
-    newTab.splice(index, 1);
-    setTab(newTab);
-    localStorage.setItem("tab", JSON.stringify(newTab));
+  const handleDeleteItem = (itemId) => {
+    const itemRef = ref(database, `items/${itemId}`);
+    remove(itemRef)
+      .then(() => {
+        console.log("Item deleted successfully");
+      })
+      .catch((error) => {
+        console.error("Error deleting item:", error);
+      });
   };
 
   return (
@@ -82,57 +101,22 @@ function CodeHighlighter() {
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             save={saveNewItem}
-            handleFilterLanguage={handleFilterLanguage} // Passer la fonction handleFilterLanguage comme prop
+            handleFilterLanguage={handleFilterLanguage}
           />
         </div>
       </div>
       <br />
       <div className="highlight-code">
-        {currentItems.length > 0 ? (
-          currentItems.map((item, index) => (
-            <div key={index} className="card mb-3">
-              <div className="card-body">
-                <h2 className="card-title">{item.title}</h2>
-                <div
-                  ref={(el) => (captureRefs.current[offset + index] = el)}
-                  className="mb-3"
-                >
-                  <SyntaxHighlighter
-                    language={item.language}
-                    style={vscDarkPlusTheme}
-                    wrapLines={true}
-                    customStyle={{ fontSize: "14px", lineHeight: "1.5" }}
-                  >
-                    {item.code}
-                  </SyntaxHighlighter>
-                </div>
-                <div className="d-flex justify-content-between">
-                  <DeleteItem
-                    tab={tab}
-                    setTab={setTab}
-                    index={offset + index}
-                    handleDelete={handleDeleteItem}
-                  />
-                  <CopyToClipboard data={item} />
-                  <ExportAsImage
-                    captureRefs={captureRefs}
-                    index={offset + index}
-                    item={item}
-                  />
-                  <ExportAsFile
-                    captureRefs={captureRefs}
-                    index={offset + index}
-                    item={item}
-                  />
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div>Aucun élément trouvé.</div>
-        )}
-        <Page
-          data={filteredItems}
+        <ItemList
+          items={currentItems}
+          offset={offset}
+          captureRefs={captureRefs}
+          tab={tab}
+          setTab={setTab}
+          handleDeleteItem={handleDeleteItem}
+        />
+        <Pagination
+          filteredItems={filteredItems}
           itemsPerPage={itemsPerPage}
           onPageChange={handlePageChange}
         />
