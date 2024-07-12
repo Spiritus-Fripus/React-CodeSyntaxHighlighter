@@ -11,6 +11,9 @@ function LanguageSelector({ language, handleLanguageChange }) {
         <option value="">Sélectionner une langue</option>
         <option value="js">JavaScript</option>
         <option value="php">PHP</option>
+        <option value="python">Python</option>
+        <option value="java">Java</option>
+        <option value="cs">C#</option>
       </select>
     </div>
   );

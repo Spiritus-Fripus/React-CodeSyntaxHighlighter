@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import FormCodeHighlighter from "../FormCodeHighlighter/FormCodeHighlighter";
-import ItemList from "../Items/CardItems/ItemList";
+import ItemList from "../Items/Items/ItemList";
 import Pagination from "../Items/PageItems/Pagination";
-import { ref, push, onValue, remove } from "firebase/database";
+import { ref, push, onValue } from "firebase/database";
 import { database } from "../../firebase";
 
 function CodeHighlighter() {
@@ -12,33 +12,32 @@ function CodeHighlighter() {
   const [filterLanguage, setFilterLanguage] = useState("");
   const [title, setTitle] = useState("");
   const [code, setCode] = useState("");
+  const [loaded, setLoaded] = useState(false);
   const [language, setLanguage] = useState("");
   const captureRefs = useRef([]);
   const itemsPerPage = 5;
 
   useEffect(() => {
-    const itemsRef = ref(database, "items");
-    onValue(itemsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const itemsList = Object.entries(data).map(([key, value]) => ({
-          id: key,
-          ...value,
-        }));
-        setTab(itemsList);
-      } else {
-        setTab([]);
-      }
-    });
-    setSearchTerm("");
-    setFilterLanguage("");
-    setCurrentPage(0);
-  }, []);
-
-  const handleFilterLanguage = (language) => {
-    setFilterLanguage(language);
-    setCurrentPage(0);
-  };
+    if (!loaded) {
+      const itemsRef = ref(database, "items");
+      onValue(itemsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const itemsList = Object.entries(data).map(([key, value]) => ({
+            id: key,
+            ...value,
+          }));
+          setTab(itemsList);
+          setLoaded(true);
+        } else {
+          setTab([]);
+        }
+      });
+      setSearchTerm("");
+      setFilterLanguage("");
+      setCurrentPage(0);
+    }
+  }, [loaded]);
 
   const filteredItems = tab
     .filter(
@@ -58,6 +57,7 @@ function CodeHighlighter() {
     const newItem = { title, code, language };
 
     const itemsRef = ref(database, "items");
+    setTab([...tab, newItem]);
     push(itemsRef, newItem)
       .then(() => {
         console.log("Item saved successfully");
@@ -71,20 +71,12 @@ function CodeHighlighter() {
         console.error("Error saving item:", error);
       });
   };
-
+  const handleFilterLanguage = (language) => {
+    setFilterLanguage(language);
+    setCurrentPage(0);
+  };
   const handlePageChange = (selectedPage) => {
     setCurrentPage(selectedPage);
-  };
-
-  const handleDeleteItem = (itemId) => {
-    const itemRef = ref(database, `items/${itemId}`);
-    remove(itemRef)
-      .then(() => {
-        console.log("Item deleted successfully");
-      })
-      .catch((error) => {
-        console.error("Error deleting item:", error);
-      });
   };
 
   return (
@@ -100,8 +92,8 @@ function CodeHighlighter() {
             setLanguage={setLanguage}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
-            save={saveNewItem}
             handleFilterLanguage={handleFilterLanguage}
+            save={saveNewItem}
           />
         </div>
       </div>
@@ -111,9 +103,6 @@ function CodeHighlighter() {
           items={currentItems}
           offset={offset}
           captureRefs={captureRefs}
-          tab={tab}
-          setTab={setTab}
-          handleDeleteItem={handleDeleteItem}
         />
         <Pagination
           filteredItems={filteredItems}

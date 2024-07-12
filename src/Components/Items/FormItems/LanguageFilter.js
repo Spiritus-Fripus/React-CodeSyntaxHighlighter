@@ -21,6 +21,24 @@ function LanguageFilter({ language, handleFilterLanguage }) {
       >
         PHP
       </button>
+      <button
+        onClick={() => handleFilterLanguage("python")}
+        className={`btn btn-secondary ${language === "python" ? "active" : ""}`}
+      >
+        Python
+      </button>
+      <button
+        onClick={() => handleFilterLanguage("java")}
+        className={`btn btn-secondary ${language === "java" ? "active" : ""}`}
+      >
+        Java
+      </button>
+      <button
+        onClick={() => handleFilterLanguage("cs")}
+        className={`btn btn-secondary ${language === "cs" ? "active" : ""}`}
+      >
+        C#
+      </button>
     </div>
   );
 }
