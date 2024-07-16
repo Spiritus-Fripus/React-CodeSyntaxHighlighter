@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
 import { toast } from "react-toastify";
-import Logo from "../Items/Logo/Logo";
 
 function Login({ setLoggedIn }) {
   const [email, setEmail] = useState("");
@@ -26,10 +25,6 @@ function Login({ setLoggedIn }) {
   };
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mb-3">
-        <Logo />
-      </div>
-
       <div className="mb-3">
         <label>Email address</label>
         <input
