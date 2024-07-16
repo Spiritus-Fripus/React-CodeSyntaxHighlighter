@@ -1,6 +1,6 @@
 import React from "react";
 import { ref, remove } from "firebase/database";
-import { database } from "../../../firebase";
+import { database } from "../../../firebase/firebase";
 
 function DeleteItem({ itemId }) {
   const deleteItem = (itemId) => {

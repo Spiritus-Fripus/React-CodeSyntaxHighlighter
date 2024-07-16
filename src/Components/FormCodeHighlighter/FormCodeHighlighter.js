@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus as vscDarkPlusTheme } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import CodeInput from "../Items/FormItems/CodeInput";
@@ -18,16 +18,28 @@ function FormCodeHighlighter(props) {
     searchTerm,
     setSearchTerm,
     handleFilterLanguage,
+    setLoggedIn,
   } = props;
   const captureRef = useRef(null);
-
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
   };
 
+  const Logout = () => {
+    localStorage.removeItem("userId");
+    setLoggedIn(false);
+  };
+
   return (
     <div className="container mt-4">
-      <h2>Code Syntax Highlighter</h2>
+      <div className="row">
+        <div className="d-flex justify-content-between align-items-center mb-3 w-100">
+          <h2>Code Syntax Highlighter</h2>
+          <button className="btn btn-dark" onClick={Logout}>
+            Logout
+          </button>
+        </div>
+      </div>
 
       <div className="row">
         <input

@@ -3,9 +3,9 @@ import FormCodeHighlighter from "../FormCodeHighlighter/FormCodeHighlighter";
 import ItemList from "../Items/Items/ItemList";
 import Pagination from "../Items/PageItems/Pagination";
 import { ref, push, onValue } from "firebase/database";
-import { database } from "../../firebase";
+import { auth, database } from "../../firebase/firebase";
 
-function CodeHighlighter() {
+function CodeHighlighter({ setLoggedIn }) {
   const [tab, setTab] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,10 +16,12 @@ function CodeHighlighter() {
   const [language, setLanguage] = useState("");
   const captureRefs = useRef([]);
   const itemsPerPage = 5;
+  const user = auth.currentUser;
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
     if (!loaded) {
-      const itemsRef = ref(database, "items");
+      const itemsRef = ref(database, "items/" + userId);
       onValue(itemsRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
@@ -55,8 +57,7 @@ function CodeHighlighter() {
 
   const saveNewItem = () => {
     const newItem = { title, code, language };
-
-    const itemsRef = ref(database, "items");
+    const itemsRef = ref(database, "items/" + user.uid);
     setTab([...tab, newItem]);
     push(itemsRef, newItem)
       .then(() => {
@@ -94,6 +95,7 @@ function CodeHighlighter() {
             setSearchTerm={setSearchTerm}
             handleFilterLanguage={handleFilterLanguage}
             save={saveNewItem}
+            setLoggedIn={setLoggedIn}
           />
         </div>
       </div>

@@ -25,7 +25,6 @@ function Clock() {
       <div className="card p-4 shadow-lg">
         <h1 className="card-subtitle mb-2 text-muted">{showDate}</h1>
         <h2 className="display-4">{showTime}</h2>
-        <a href="/login">login</a>
       </div>
     </div>
   );

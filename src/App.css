@@ -16,6 +16,7 @@
 .App-header {
     background-color: #f8f9fa; /* Couleur de fond Bootstrap */
     min-height: 100vh;
+    min-width: 80vw;
     display: flex;
     flex-direction: column;
     align-items: center;
