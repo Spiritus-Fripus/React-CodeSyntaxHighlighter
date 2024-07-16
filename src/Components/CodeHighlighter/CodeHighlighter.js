@@ -21,7 +21,7 @@ function CodeHighlighter({ setLoggedIn }) {
 
   useEffect(() => {
     if (!loaded) {
-      const itemsRef = ref(database, "items/" + userId);
+      const itemsRef = ref(database, `items/${userId}`);
       onValue(itemsRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
@@ -57,7 +57,7 @@ function CodeHighlighter({ setLoggedIn }) {
 
   const saveNewItem = () => {
     const newItem = { title, code, language };
-    const itemsRef = ref(database, "items/" + user.uid);
+    const itemsRef = ref(database, `items/${user.uid}`);
     setTab([...tab, newItem]);
     push(itemsRef, newItem)
       .then(() => {
